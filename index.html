@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma Infra Vertical — Mirante Belvedere</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+#app{max-width:1500px;margin:0 auto;padding:16px}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);color:#fff;border-radius:14px;overflow:hidden;margin-bottom:16px}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;gap:20px}
+.header-left{flex:1;min-width:0}
+header h1{font-size:17px;font-weight:700;line-height:1.35}
+.sub{font-size:11px;color:#6C8EBF;margin-top:4px}
+.header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 22px;border-top:1px solid rgba(255,255,255,0.07);background:rgba(0,0,0,0.18)}
+.logos-right{display:flex;align-items:center;flex-shrink:0}
+.logo-mirante-chip{background:#181818;border-radius:10px;padding:9px 16px;text-align:center;border:1px solid rgba(201,169,110,0.25);min-width:120px}
+.mirante-name{font-family:'Nunito',sans-serif;font-weight:900;font-size:22px;color:#C9A96E;line-height:1;letter-spacing:-0.5px}
+.mirante-line{height:1px;background:rgba(255,255,255,0.35);margin:5px 0}
+.mirante-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9.5px;color:#e8e8e8;letter-spacing:3.5px}
+.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;white-space:nowrap}
+.btn-weather{background:#0277BD;color:#fff}
+.btn-weather:hover{background:#01579B}
+.btn-reset{background:#c62828;color:#fff}
+.btn-reset:hover{background:#b71c1c}
+.date-group{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);padding:7px 12px;border-radius:8px}
+.date-group label{font-size:11px;color:#aaa}
+.date-group input[type=date]{background:transparent;border:none;color:#fff;font-size:13px;outline:none;cursor:pointer}
+.date-group input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer}
+
+/* ERROR & DELAY BANNER */
+#errorBanner{display:none;background:#ffebee;border:1px solid #ef9a9a;border-radius:8px;padding:12px 16px;margin-bottom:12px;color:#c62828;font-size:13px}
+.delay-banner{display:none;background:#FFF5F5;border:1.5px solid #FCA5A5;border-radius:12px;padding:14px 20px;margin-bottom:16px;align-items:center;gap:16px}
+.delay-banner.show{display:flex}
+.delay-count{font-size:36px;font-weight:900;color:#DC2626;line-height:1;flex-shrink:0}
+.delay-info strong{font-size:14px;color:#991B1B}
+.delay-info span{font-size:11px;color:#B91C1C;display:block;margin-top:2px}
+
+/* WEATHER */
+#weatherWidget{background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.weather-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.weather-title{font-size:13px;font-weight:700;color:#444}
+.weather-loc{font-size:11px;color:#999;margin-top:2px}
+.weather-ts{font-size:10px;color:#bbb}
+.weather-days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.wd{flex:0 0 auto;width:88px;background:#f8f9fa;border-radius:10px;padding:10px 8px;text-align:center;border:2px solid transparent}
+.wd.today{border-color:#1565C0;background:#E3F2FD}
+.wd.rain-warn{border-color:#E65100;background:#FFF3E0}
+.wd-date{font-size:10px;color:#888;margin-bottom:3px}
+.wd-icon{font-size:24px;margin:4px 0}
+.wd-desc{font-size:9px;color:#777;margin-bottom:4px;height:26px;line-height:1.3;display:flex;align-items:center;justify-content:center;text-align:center}
+.wd-temp{font-size:12px;font-weight:700;color:#333}
+.wd-rain{font-size:11px;color:#1565C0;margin-top:3px}
+.wd-rain.hi{color:#E65100;font-weight:700}
+.weather-msg{text-align:center;color:#aaa;padding:16px;font-size:13px}
+.weather-alert{background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:8px 12px;font-size:12px;color:#E65100;margin-top:10px;display:flex;align-items:center;gap:6px}
+
+/* SUMMARY CARDS */
+#summaryCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.sum-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid}
+.sum-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:4px}
+.sum-value{font-size:26px;font-weight:900;margin:4px 0;line-height:1}
+.sum-sub{font-size:11px;color:#999;margin-bottom:8px}
+.sum-bar{height:6px;background:#eee;border-radius:3px;overflow:hidden}
+.sum-bar-fill{height:6px;border-radius:3px;transition:width .5s}
+
+/* ACTIVITY CARDS */
+#activityCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-bottom:16px}
+.act-card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;display:flex;flex-direction:column}
+.act-card-top{padding:11px 14px 9px;display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.act-name{font-size:11.5px;font-weight:700;line-height:1.35;flex:1;color:#1a1a2e}
+.act-badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;white-space:nowrap}
+.b-em-dia{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7}
+.b-atrasado{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;animation:blink 2s infinite}
+.b-concluido{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7}
+.b-hoje{background:#DBEAFE;color:#1D4ED8;border:1px solid #93C5FD}
+.b-futuro{background:#F3F4F6;color:#9CA3AF;border:1px solid #E5E7EB}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.55}}
+.act-card-body{padding:0 14px 12px;flex:1;display:flex;flex-direction:column;gap:6px}
+.act-bar-bg{height:5px;background:#eee;border-radius:3px;overflow:hidden}
+.act-bar-fill{height:5px;border-radius:3px}
+.act-meta{display:flex;justify-content:space-between;font-size:10px;color:#999}
+.act-footer{display:flex;align-items:center;justify-content:space-between;margin-top:2px}
+.act-remaining{font-size:10px;color:#666}
+.btn-prio{background:none;border:1px solid #ddd;border-radius:6px;padding:3px 9px;cursor:pointer;font-size:10px;font-weight:600;color:#555;transition:all .15s}
+.btn-prio:hover{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+
+/* PRIORITY PANEL */
+.pp-section{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:16px;overflow:hidden}
+.pp-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#1a1a2e;color:#fff}
+.pp-title{font-size:13px;font-weight:700}
+.pp-hint{font-size:10px;color:#6C8EBF}
+.pp-grid{display:flex;flex-wrap:wrap;gap:0;padding:12px 14px;gap:8px}
+.pp-card{border-radius:10px;padding:10px 13px;border-left:4px solid;min-width:150px;flex:1 1 150px;max-width:220px}
+.pp-act-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.pp-day-info{font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:2px}
+.pp-prod{font-size:10px;color:#555;margin-bottom:4px}
+.pp-date-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+.pp-empty{text-align:center;color:#bbb;font-size:12px;padding:20px}
+
+/* TABLE */
+.table-section{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;gap:8px}
+.table-toolbar-title{font-size:14px;font-weight:700;color:#333}
+.btn-sm{padding:5px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:#555}
+.btn-sm:hover{background:#f5f5f5}
+.tip{font-size:11px;color:#aaa}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:#1a1a2e;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600;font-size:10px;letter-spacing:.3px;white-space:nowrap}
+tbody tr{border-bottom:1px solid #f0f0f0;transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tr.row-today{background:#EFF6FF}
+tr.row-done{background:#F0FFF4}
+tr.row-partial{background:#FFFBEB}
+tr.row-overdue{background:#FFF5F5}
+tr.row-future{background:#fff}
+td{padding:8px 12px;vertical-align:middle}
+td.td-num{color:#ccc;font-size:10px;width:32px;text-align:right}
+td.td-date{font-weight:700;font-size:12px;white-space:nowrap}
+td.td-day{color:#888;font-size:11px;width:34px}
+td.td-chips{padding:7px 10px}
+td.td-stat{text-align:right;white-space:nowrap;width:140px}
+
+/* TASK CHIPS */
+.chips-wrap{display:flex;flex-wrap:wrap;gap:5px}
+.t-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px 4px 5px;border-radius:8px;border:1.5px solid;transition:opacity .2s;cursor:default;user-select:none}
+.t-chip.chip-done{opacity:.4;text-decoration:line-through}
+.t-chip.chip-pending{}
+.t-chip.chip-future{opacity:.55}
+.chip-cb{width:13px;height:13px;cursor:pointer;flex-shrink:0;accent-color:#16A34A}
+.chip-name{font-size:10px;font-weight:700}
+.chip-d{font-size:9px;font-weight:500;opacity:.7}
+
+/* STATUS BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;margin:1px}
+.bd-hoje{background:#DBEAFE;color:#1D4ED8;border:1px solid #93C5FD}
+.bd-done{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7}
+.bd-partial{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D}
+.bd-atraso{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;animation:blink 2s infinite}
+.bd-future{background:#F3F4F6;color:#9CA3AF;border:1px solid #E5E7EB}
+
+footer{text-align:center;font-size:10px;color:#bbb;padding:8px 0 16px}
+
+@media(max-width:700px){
+  header h1{font-size:13px}
+  .logos-right{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <h1>Cronograma de Infraestrutura Vertical — Mirante Belvedere</h1>
+      <div class="sub">5 Equipes Paralelas · Método Industrial · Seg–Sex · Recife / PE</div>
+    </div>
+    <div class="logos-right">
+      <div class="logo-mirante-chip">
+        <div class="mirante-name">mirante</div>
+        <div class="mirante-line"></div>
+        <div class="mirante-sub">BELVEDERE</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-controls">
+    <div class="date-group">
+      <label>Início:</label>
+      <input type="date" id="startDateInput" value="2026-06-03" onchange="onDateChange()">
+    </div>
+    <button class="btn btn-weather" onclick="fetchWeather()">🔄 Atualizar Tempo</button>
+    <button class="btn btn-reset" onclick="resetAll()">🗑 Reset</button>
+  </div>
+</header>
+
+<div id="errorBanner"></div>
+
+<div class="delay-banner" id="delayBanner">
+  <div class="delay-count" id="delayCount">0</div>
+  <div class="delay-info">
+    <strong id="delayLabel">dias de atraso acumulado</strong>
+    <span id="delayDetail">atividades não executadas no prazo</span>
+  </div>
+</div>
+
+<div id="weatherWidget"><div class="weather-msg">🌤️ Carregando previsão do tempo...</div></div>
+
+<div id="summaryCards"></div>
+<div id="activityCards"></div>
+
+<div class="pp-section">
+  <div class="pp-header">
+    <span class="pp-title">📌 Próxima Execução por Atividade</span>
+    <span class="pp-hint">Clique ⬆ Priorizar no card para adiantar a atividade</span>
+  </div>
+  <div class="pp-grid" id="ppGrid"></div>
+</div>
+
+<div class="table-section">
+  <div class="table-toolbar">
+    <div class="table-toolbar-title">📅 Cronograma Diário — 5 Equipes Paralelas (Seg–Sex)</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn-sm" onclick="resetOrder()">↺ Restaurar Ordem</button>
+      <span class="tip">💡 Use ⬆ Priorizar nos cards para reorganizar</span>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px">#</th>
+          <th>Data</th>
+          <th style="width:34px">Dia</th>
+          <th>Atividades do Dia (5 equipes)</th>
+          <th style="width:150px;text-align:right">Status</th>
+        </tr>
+      </thead>
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>📍 Rua Eduardo Antonio Amorim, 141 — Recife / PE · Cronograma gerado em <span id="genDate"></span></footer>
+</div>
+
+<script>
+"use strict";
+
+// ==================== CONFIG ====================
+// Days from the project table (right side of image)
+var ACTIVITIES = [
+  { id:'spda',        name:'SPDA',                     shortName:'SPDA',        desc:'Escavação, hastes, caixas e fechamento da malha', total:515,  unit:'m',    rate:50,   days:11, color:'#1D4ED8', bg:'#DBEAFE', border:'#93C5FD' },
+  { id:'gas',         name:'Gás Geral',                 shortName:'Gás Geral',   desc:'Escavação, tubos, conexões e teste',              total:192,  unit:'m',    rate:24,   days:8,  color:'#B45309', bg:'#FEF9C3', border:'#FDE047' },
+  { id:'esg_torres',  name:'Entorno Torres — Esgoto',   shortName:'Esg.Torres',  desc:'Esgoto entorno das torres',                      total:137,  unit:'m',    rate:11,   days:13, color:'#6D28D9', bg:'#EDE9FE', border:'#C4B5FD' },
+  { id:'pluv_torres', name:'Entorno Torres — Pluvial',  shortName:'Pluv.Torres', desc:'Pluvial rasa entorno das torres',                total:238,  unit:'m',    rate:13.5, days:18, color:'#0E7490', bg:'#CFFAFE', border:'#67E8F9' },
+  { id:'pluv_geral',  name:'Infra Pluvial (Rasa)',      shortName:'Pluv.Geral',  desc:'Pluvial rasa infraestrutura geral',              total:257,  unit:'m',    rate:15,   days:17, color:'#15803D', bg:'#DCFCE7', border:'#86EFAC' },
+  { id:'agua_fria',   name:'Água Fria / Incêndio',      shortName:'Água/Incê.',  desc:'Água fria e incêndio geral',                    total:270,  unit:'m',    rate:22,   days:13, color:'#B91C1C', bg:'#FEE2E2', border:'#FCA5A5' },
+  { id:'esg_geral',   name:'Infra Geral de Esgoto',     shortName:'Esg.Geral',   desc:'Esgoto infraestrutura geral',                   total:95,   unit:'m',    rate:11,   days:9,  color:'#374151', bg:'#F1F5F9', border:'#CBD5E1' },
+  { id:'muro_base',   name:'Muro de Placas — Base',     shortName:'Muro Base',   desc:'Mourões + 3 placas base',                       total:73,   unit:'mód',  rate:4.5,  days:17, color:'#C2410C', bg:'#FFEDD5', border:'#FDB97D' },
+  { id:'muro_comp',   name:'Muro de Placas — Compl.',   shortName:'Muro Comp.',  desc:'Completar +5 placas por lote',                  total:73,   unit:'mód',  rate:22,   days:4,  color:'#9D174D', bg:'#FCE7F3', border:'#F9A8D4' },
+  { id:'acabamento',  name:'Acabamento das Caixas',     shortName:'Acabamento',  desc:'Berço + calafatagem',                           total:123,  unit:'unid', rate:3.5,  days:35, color:'#78350F', bg:'#FEF3C7', border:'#D97706' }
+];
+// Total: 11+8+13+18+17+13+9+17+4+35 = 145 activity-days → 29 working days
+
+var TEAMS = 5;
+var DAYS_PT   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var MONTHS_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+var LAT = -8.0476, LON = -34.8770;
+
+// ==================== STATE ====================
+var state = {
+  startDate: '2026-06-03',
+  taskOrder: null,  // Array of {id, activityId, dayNum, totalDays}
+  completed: {},    // {taskId: true}
+  schedule: []      // Computed daily schedule
+};
+
+function loadState() {
+  try { state.startDate = localStorage.getItem('civ2_start') || '2026-06-03'; } catch(e){}
+  try { var o = JSON.parse(localStorage.getItem('civ2_order')); if(o) state.taskOrder = o; } catch(e){}
+  try { state.completed = JSON.parse(localStorage.getItem('civ2_done')) || {}; } catch(e){}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('civ2_start', state.startDate);
+    localStorage.setItem('civ2_order', JSON.stringify(state.taskOrder));
+    localStorage.setItem('civ2_done',  JSON.stringify(state.completed));
+  } catch(e){}
+}
+
+// ==================== HELPERS ====================
+function getAct(id) {
+  for (var i = 0; i < ACTIVITIES.length; i++) { if (ACTIVITIES[i].id === id) return ACTIVITIES[i]; }
+  return null;
+}
+
+function lastItem(arr) { return arr.length ? arr[arr.length - 1] : null; }
+
+function fmtDate(d) {
+  var dd = String(d.getDate()).padStart('0', 2);
+  var mm = String(d.getMonth() + 1).padStart('0', 2);
+  return dd + '/' + mm + '/' + d.getFullYear();
+}
+
+function fmtNum(n) {
+  var s = parseFloat(n.toFixed(2)).toString();
+  return s.replace('.', ',');
+}
+
+if (!String.prototype.padStart) {
+  String.prototype.padStart = function(len, ch) {
+    var s = String(this); ch = ch || ' ';
+    while (s.length < len) s = ch + s;
+    return s;
+  };
+}
+
+// ==================== DEFAULT ORDER ====================
+function makeDefaultOrder() {
+  var order = [];
+  ACTIVITIES.forEach(function(act) {
+    for (var d = 1; d <= act.days; d++) {
+      order.push({ id: act.id + '_' + d, activityId: act.id, dayNum: d, totalDays: act.days });
+    }
+  });
+  return order; // 145 items
+}
+
+// ==================== BUILD SCHEDULE ====================
+function buildSchedule(startStr, taskOrder) {
+  var schedule = [];
+  var d = new Date(startStr + 'T12:00:00');
+  var taskIdx = 0;
+  var workDay = 0;
+  var safety = 0;
+
+  while (taskIdx < taskOrder.length && safety < 500) {
+    safety++;
+    while (d.getDay() === 0 || d.getDay() === 6) { d.setDate(d.getDate() + 1); }
+
+    var slots = [];
+    var fill = Math.min(TEAMS, taskOrder.length - taskIdx);
+    for (var i = 0; i < fill; i++) {
+      var t = taskOrder[taskIdx + i];
+      var act = getAct(t.activityId);
+      if (!act) continue;
+      var lastProd = parseFloat((act.total - (t.totalDays - 1) * act.rate).toFixed(2));
+      if (lastProd <= 0) lastProd = act.rate;
+      var prod  = (t.dayNum === t.totalDays) ? lastProd : act.rate;
+      var accum = parseFloat(Math.min(t.dayNum * act.rate, act.total).toFixed(2));
+      slots.push({
+        id: t.id, activityId: act.id, dayNum: t.dayNum, totalDays: t.totalDays,
+        production: prod, accumulated: accum, total: act.total,
+        pct: parseFloat((accum / act.total * 100).toFixed(1)),
+        isLast: t.dayNum === t.totalDays, activity: act
+      });
+    }
+    taskIdx += fill;
+
+    schedule.push({ date: new Date(d.getTime()), workDay: ++workDay, slots: slots });
+    d.setDate(d.getDate() + 1);
+  }
+  return schedule;
+}
+
+// ==================== DELAY METRICS ====================
+function calcMetrics() {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var expected = 0, completed = 0, delayed = 0;
+
+  state.schedule.forEach(function(day) {
+    var dd = new Date(day.date.getTime()); dd.setHours(0,0,0,0);
+    if (dd > today) return;
+    expected += day.slots.length;
+    day.slots.forEach(function(s) {
+      if (state.completed[s.id]) completed++;
+      else delayed++;
+    });
+  });
+
+  return { expected: expected, completed: completed, delayed: delayed,
+           delayDays: delayed > 0 ? Math.ceil(delayed / TEAMS) : 0 };
+}
+
+// ==================== RENDER SUMMARY ====================
+function renderSummary() {
+  var el = document.getElementById('summaryCards');
+  if (!el) return;
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var totalTasks = state.taskOrder ? state.taskOrder.length : 0;
+  var totalDone = Object.keys(state.completed).filter(function(k){ return !!state.completed[k]; }).length;
+  var pct = totalTasks ? parseFloat((totalDone / totalTasks * 100).toFixed(1)) : 0;
+  var m = calcMetrics();
+
+  var wdTotal = state.schedule.length;
+  var wdDone  = state.schedule.filter(function(d){
+    var dd = new Date(d.date.getTime()); dd.setHours(0,0,0,0); return dd <= today;
+  }).length;
+
+  var last = lastItem(state.schedule);
+  var estFim = last ? fmtDate(last.date) : '—';
+  var inicio = fmtDate(new Date(state.startDate + 'T12:00:00'));
+
+  var html = '';
+  // 1. Progresso geral
+  html += '<div class="sum-card" style="border-top-color:#1D4ED8">'
+    + '<div class="sum-label">Progresso Geral</div>'
+    + '<div class="sum-value" style="color:#1D4ED8">'+pct+'<span style="font-size:15px;font-weight:600">%</span></div>'
+    + '<div class="sum-sub">'+totalDone+' de '+totalTasks+' atividades-dia</div>'
+    + '<div class="sum-bar"><div class="sum-bar-fill" style="width:'+pct+'%;background:#1D4ED8"></div></div>'
+    + '</div>';
+
+  // 2. Dias úteis
+  var wdPct = wdTotal ? parseFloat((wdDone/wdTotal*100).toFixed(1)) : 0;
+  html += '<div class="sum-card" style="border-top-color:#15803D">'
+    + '<div class="sum-label">Dias de Trabalho</div>'
+    + '<div class="sum-value" style="color:#15803D">'+wdDone+'<span style="font-size:14px;font-weight:500;color:#999"> / '+wdTotal+'</span></div>'
+    + '<div class="sum-sub">Início '+inicio+' · Fim previsto '+estFim+'</div>'
+    + '<div class="sum-bar"><div class="sum-bar-fill" style="width:'+wdPct+'%;background:#15803D"></div></div>'
+    + '</div>';
+
+  // 3. Status atraso
+  var delColor = m.delayed === 0 ? '#15803D' : '#DC2626';
+  html += '<div class="sum-card" style="border-top-color:'+delColor+'">'
+    + '<div class="sum-label">Status Geral</div>'
+    + '<div class="sum-value" style="color:'+delColor+'">'+(m.delayed===0?'✅ Em dia':'⚠ Atraso')+'</div>'
+    + '<div class="sum-sub">'+(m.delayed===0?'Todas no prazo':m.delayed+' atividades-dia pendentes')+'</div>'
+    + '<div class="sum-sub" style="color:'+delColor+';font-weight:700">'+(m.delayDays>0?m.delayDays+' dia(s) de defasagem':'')+'</div>'
+    + '</div>';
+
+  // 4. Execução de equipes
+  var teamExp = wdDone * TEAMS;
+  var teamPct = teamExp ? parseFloat((m.completed/teamExp*100).toFixed(1)) : 0;
+  html += '<div class="sum-card" style="border-top-color:#7C3AED">'
+    + '<div class="sum-label">Execução de Equipes</div>'
+    + '<div class="sum-value" style="color:#7C3AED">'+m.completed+'<span style="font-size:14px;font-weight:500;color:#999"> / '+teamExp+'</span></div>'
+    + '<div class="sum-sub">Atividades executadas no período</div>'
+    + '<div class="sum-bar"><div class="sum-bar-fill" style="width:'+teamPct+'%;background:#7C3AED"></div></div>'
+    + '</div>';
+
+  el.innerHTML = html;
+
+  // Delay banner
+  var banner = document.getElementById('delayBanner');
+  if (banner) {
+    if (m.delayed > 0) {
+      banner.classList.add('show');
+      var dc = document.getElementById('delayCount');
+      var dl = document.getElementById('delayLabel');
+      var dd2 = document.getElementById('delayDetail');
+      if (dc) dc.textContent = m.delayDays;
+      if (dl) dl.textContent = 'dia'+(m.delayDays!==1?'s':'')+' de atraso acumulado';
+      if (dd2) dd2.textContent = m.delayed+' atividade'+(m.delayed!==1?'s':'')+'-dia não executada'+(m.delayed!==1?'s':'')+' no prazo';
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+}
+
+// ==================== RENDER ACTIVITY CARDS ====================
+function renderActivityCards() {
+  var el = document.getElementById('activityCards');
+  if (!el) return;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var html = '';
+
+  ACTIVITIES.forEach(function(act) {
+    var doneDays = 0;
+    for (var d = 1; d <= act.days; d++) { if (state.completed[act.id+'_'+d]) doneDays++; }
+    var remaining = act.days - doneDays;
+    var pct = act.days ? parseFloat((doneDays/act.days*100).toFixed(1)) : 0;
+    var prodDone = parseFloat(Math.min(doneDays * act.rate, act.total).toFixed(2));
+    var isComplete = remaining <= 0;
+
+    // Find next scheduled date
+    var nextDate = null;
+    for (var i = 0; i < state.schedule.length; i++) {
+      for (var j = 0; j < state.schedule[i].slots.length; j++) {
+        var s = state.schedule[i].slots[j];
+        if (s.activityId === act.id && !state.completed[s.id]) {
+          nextDate = new Date(state.schedule[i].date.getTime()); nextDate.setHours(0,0,0,0);
+          break;
+        }
+      }
+      if (nextDate) break;
+    }
+
+    var badgeHtml = '';
+    if (isComplete) {
+      badgeHtml = '<span class="act-badge b-concluido">✅ Concluída</span>';
+    } else if (!nextDate) {
+      badgeHtml = '<span class="act-badge b-futuro">Futura</span>';
+    } else if (nextDate < today) {
+      badgeHtml = '<span class="act-badge b-atrasado">⚠ Atrasada</span>';
+    } else if (nextDate.getTime() === today.getTime()) {
+      badgeHtml = '<span class="act-badge b-hoje">🔴 Hoje</span>';
+    } else {
+      badgeHtml = '<span class="act-badge b-em-dia">✓ Em dia</span>';
+    }
+
+    html += '<div class="act-card">'
+      + '<div class="act-card-top" style="background:'+act.bg+';border-bottom:2px solid '+act.border+'">'
+      + '<div class="act-name" style="color:'+act.color+'">'+act.name+'</div>'
+      + badgeHtml
+      + '</div>'
+      + '<div class="act-card-body">'
+      + '<div class="act-bar-bg"><div class="act-bar-fill" style="width:'+pct+'%;background:'+act.color+'"></div></div>'
+      + '<div class="act-meta">'
+      + '<span>'+fmtNum(prodDone)+'/'+fmtNum(act.total)+' '+act.unit+'</span>'
+      + '<span style="font-weight:700;color:'+act.color+'">'+pct+'%</span>'
+      + '</div>'
+      + '<div class="act-meta"><span>Meta: '+fmtNum(act.rate)+' '+act.unit+'/dia</span><span>'+doneDays+'/'+act.days+' dias</span></div>'
+      + '<div class="act-footer">'
+      + (isComplete
+          ? '<span class="act-remaining" style="color:#15803D;font-weight:700">Fase concluída 🎉</span><span></span>'
+          : '<span class="act-remaining">'+remaining+' dia'+(remaining!==1?'s':'')+' restante'+(remaining!==1?'s':'')+'</span>'
+            + '<button class="btn-prio" onclick="promoteActivity(\''+act.id+'\')">⬆ Priorizar</button>'
+        )
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+// ==================== RENDER PRIORITY PANEL ====================
+function renderPriorityPanel() {
+  var el = document.getElementById('ppGrid');
+  if (!el) return;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var html = '';
+  var count = 0;
+
+  ACTIVITIES.forEach(function(act) {
+    var next = null;
+    for (var i = 0; i < state.schedule.length; i++) {
+      for (var j = 0; j < state.schedule[i].slots.length; j++) {
+        var s = state.schedule[i].slots[j];
+        if (s.activityId === act.id && !state.completed[s.id]) {
+          next = { day: state.schedule[i], slot: s };
+          break;
+        }
+      }
+      if (next) break;
+    }
+    if (!next) return;
+    count++;
+
+    var nd = new Date(next.day.date.getTime()); nd.setHours(0,0,0,0);
+    var isToday   = nd.getTime() === today.getTime();
+    var isOverdue = nd < today;
+    var dateStr   = isOverdue ? '⚠ ATRASADO' : (isToday ? '🔴 HOJE' : fmtDate(next.day.date));
+    var dateColor = isOverdue ? '#991B1B' : (isToday ? '#92400E' : '#1D4ED8');
+    var dateBg    = isOverdue ? '#FEE2E2' : (isToday ? '#FEF3C7' : '#DBEAFE');
+
+    html += '<div class="pp-card" style="border-left-color:'+act.color+';background:'+act.bg+'">'
+      + '<div class="pp-act-name" style="color:'+act.color+'">'+act.shortName+'</div>'
+      + '<div class="pp-day-info">Dia '+next.slot.dayNum+' de '+next.slot.totalDays+'</div>'
+      + '<div class="pp-prod">Meta: '+fmtNum(next.slot.production)+' '+act.unit+'</div>'
+      + '<span class="pp-date-tag" style="color:'+dateColor+';background:'+dateBg+'">'+dateStr+'</span>'
+      + '</div>';
+  });
+
+  el.innerHTML = count ? html : '<div class="pp-empty">🎉 Todas as atividades concluídas!</div>';
+}
+
+// ==================== RENDER TABLE ====================
+function renderTable() {
+  var tbody = document.getElementById('scheduleBody');
+  if (!tbody) return;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var html = '';
+
+  state.schedule.forEach(function(day) {
+    var dd = new Date(day.date.getTime()); dd.setHours(0,0,0,0);
+    var isToday   = dd.getTime() === today.getTime();
+    var isPast    = dd < today;
+    var isFuture  = dd > today;
+
+    var doneCount = 0;
+    day.slots.forEach(function(s) { if (state.completed[s.id]) doneCount++; });
+    var total     = day.slots.length;
+    var allDone   = doneCount === total;
+    var hasDelay  = isPast && !allDone;
+
+    var rowClass = isFuture ? 'row-future' :
+                   isToday  ? 'row-today'  :
+                   allDone  ? 'row-done'   :
+                   doneCount > 0 ? 'row-partial' : 'row-overdue';
+
+    var statusHtml = '';
+    if (isFuture)       statusHtml = '<span class="badge bd-future">Futuro</span>';
+    else if (isToday)   statusHtml = '<span class="badge bd-hoje">HOJE · '+doneCount+'/'+total+'</span>';
+    else if (allDone)   statusHtml = '<span class="badge bd-done">✓ '+total+'/'+total+'</span>';
+    else if (doneCount>0){
+      var miss = total - doneCount;
+      statusHtml = '<span class="badge bd-partial">'+doneCount+'/'+total+'</span>'
+                 + '<span class="badge bd-atraso">-'+miss+' ATRASO</span>';
+    } else {
+      statusHtml = '<span class="badge bd-atraso">⚠ '+total+' Atrasados</span>';
+    }
+
+    html += '<tr class="'+rowClass+'">';
+    html += '<td class="td-num">'+day.workDay+'</td>';
+    html += '<td class="td-date">'+fmtDate(day.date)+'</td>';
+    html += '<td class="td-day">'+DAYS_PT[day.date.getDay()]+'</td>';
+    html += '<td class="td-chips"><div class="chips-wrap">';
+
+    day.slots.forEach(function(slot) {
+      var act     = slot.activity;
+      var isDone  = !!state.completed[slot.id];
+      var cls     = 't-chip ' + (isDone ? 'chip-done' : isFuture ? 'chip-future' : 'chip-pending');
+      html += '<div class="'+cls+'" style="border-color:'+act.color+';background:'+act.bg+'">';
+      html += '<input type="checkbox" class="chip-cb"'+(isDone?' checked':'')+' onchange="toggleTask(\''+slot.id+'\',this)">';
+      html += '<span class="chip-name" style="color:'+act.color+'">'+act.shortName+'</span>';
+      html += '<span class="chip-d" style="color:'+act.color+'">D'+slot.dayNum+'</span>';
+      html += '</div>';
+    });
+
+    // If last day has fewer than 5 slots, fill with empty markers
+    for (var k = day.slots.length; k < TEAMS; k++) {
+      html += '<span style="color:#e0e0e0;font-size:11px;padding:2px 4px">—</span>';
+    }
+
+    html += '</div></td>';
+    html += '<td class="td-stat">'+statusHtml+'</td>';
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+// ==================== ACTIONS ====================
+function toggleTask(id, cb) {
+  if (cb.checked) state.completed[id] = true;
+  else delete state.completed[id];
+  saveState();
+  renderAll();
+}
+
+function promoteActivity(actId) {
+  // Move all remaining tasks of this activity to the front
+  var remaining = [], others = [];
+  state.taskOrder.forEach(function(t) {
+    if (t.activityId === actId && !state.completed[t.id]) remaining.push(t);
+    else others.push(t);
+  });
+  state.taskOrder = remaining.concat(others);
+  saveState();
+  rebuildAndRender();
+  var tbl = document.querySelector('.table-section');
+  if (tbl) tbl.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function onDateChange() {
+  var v = document.getElementById('startDateInput').value;
+  if (!v) return;
+  state.startDate = v;
+  state.taskOrder = makeDefaultOrder();
+  saveState();
+  rebuildAndRender();
+}
+
+function resetOrder() {
+  state.taskOrder = makeDefaultOrder();
+  saveState();
+  rebuildAndRender();
+}
+
+function resetAll() {
+  if (!confirm('Resetar todo o progresso e a ordem das atividades?')) return;
+  state.completed = {};
+  state.taskOrder = makeDefaultOrder();
+  saveState();
+  rebuildAndRender();
+}
+
+function rebuildAndRender() {
+  try {
+    state.schedule = buildSchedule(state.startDate, state.taskOrder);
+    renderAll();
+  } catch(e) {
+    showError('Erro ao gerar cronograma: ' + e.message);
+    console.error(e);
+  }
+}
+
+function renderAll() {
+  try { renderSummary();        } catch(e){ console.error('renderSummary', e); }
+  try { renderActivityCards();  } catch(e){ console.error('renderActivityCards', e); }
+  try { renderPriorityPanel();  } catch(e){ console.error('renderPriorityPanel', e); }
+  try { renderTable();          } catch(e){ console.error('renderTable', e); }
+}
+
+function showError(msg) {
+  var b = document.getElementById('errorBanner');
+  if (b) { b.style.display='block'; b.textContent='⚠️ '+msg; }
+}
+
+// ==================== WEATHER ====================
+var WMO = {
+  0:'☀️ Céu limpo',1:'🌤️ Quase limpo',2:'⛅ Nublado',3:'☁️ Muito nublado',
+  45:'🌫️ Névoa',48:'🌫️ Névoa',51:'🌦️ Garoa leve',53:'🌦️ Garoa',55:'🌧️ Garoa forte',
+  61:'🌧️ Chuva leve',63:'🌧️ Chuva moderada',65:'🌧️ Chuva forte',
+  80:'🌦️ Pancadas',81:'⛈️ Pancadas',82:'⛈️ Pancadas fortes',
+  95:'⛈️ Trovoada',96:'⛈️ Trovoada c/ granizo',99:'⛈️ Trovoada intensa'
+};
+
+function wmo(code) {
+  var p = (WMO[code] || '🌡️ —').split(' ');
+  return { icon:p[0], desc:p.slice(1).join(' ') };
+}
+
+function fetchWeather() {
+  var w = document.getElementById('weatherWidget');
+  if (w) w.innerHTML = '<div class="weather-msg">🌤️ Buscando previsão...</div>';
+
+  var url = 'https://api.open-meteo.com/v1/forecast'
+    +'?latitude='+LAT+'&longitude='+LON
+    +'&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
+    +'&timezone=America%2FRecife&forecast_days=7';
+
+  fetch(url).then(function(r){ return r.json(); }).then(function(data) {
+    var daily = data.daily;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var days = '', alerts = [];
+
+    for (var i = 0; i < (daily.time||[]).length; i++) {
+      var dt   = new Date(daily.time[i]+'T12:00:00');
+      var w2   = wmo(daily.weathercode[i]);
+      var tMax = Math.round(daily.temperature_2m_max[i]);
+      var tMin = Math.round(daily.temperature_2m_min[i]);
+      var prob = daily.precipitation_probability_max[i]||0;
+      var mm   = parseFloat((daily.precipitation_sum[i]||0).toFixed(1));
+      var dt0  = new Date(dt.getTime()); dt0.setHours(0,0,0,0);
+      var isToday2 = dt0.getTime()===today.getTime();
+      var isRain = prob >= 60;
+      if (isRain) alerts.push(DAYS_PT[dt.getDay()]);
+
+      days += '<div class="wd'+(isToday2?' today':'')+(isRain?' rain-warn':'')+'">'
+        +'<div class="wd-date">'+(isToday2?'Hoje':DAYS_PT[dt.getDay()]+' '+dt.getDate()+'/'+MONTHS_PT[dt.getMonth()])+'</div>'
+        +'<div class="wd-icon">'+w2.icon+'</div>'
+        +'<div class="wd-desc">'+w2.desc+'</div>'
+        +'<div class="wd-temp">'+tMax+'°/'+tMin+'°</div>'
+        +'<div class="wd-rain'+(isRain?' hi':'')+'">💧 '+prob+'%'+(mm>0?' · '+mm+'mm':'')+'</div>'
+        +'</div>';
+    }
+
+    var ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    var alertHtml = alerts.length
+      ? '<div class="weather-alert">⚠️ Risco de chuva: '+alerts.join(', ')+'</div>' : '';
+
+    if (w) w.innerHTML =
+      '<div class="weather-header">'
+      +'<div><div class="weather-title">🌤️ Previsão do Tempo — 7 dias</div>'
+      +'<div class="weather-loc">📍 Rua Eduardo Antonio Amorim, 141 · Recife, PE</div></div>'
+      +'<div class="weather-ts">Atualizado às '+ts+'</div>'
+      +'</div>'
+      +'<div class="weather-days">'+days+'</div>'+alertHtml;
+
+  }).catch(function() {
+    var w = document.getElementById('weatherWidget');
+    if (w) w.innerHTML = '<div class="weather-msg">⚠️ Previsão indisponível. Verifique a conexão.</div>';
+  });
+}
+
+// ==================== INIT ====================
+function init() {
+  loadState();
+  if (!state.taskOrder) state.taskOrder = makeDefaultOrder();
+
+  var inp = document.getElementById('startDateInput');
+  if (inp) inp.value = state.startDate;
+
+  var gd = document.getElementById('genDate');
+  if (gd) gd.textContent = fmtDate(new Date());
+
+  rebuildAndRender();
+  fetchWeather();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
